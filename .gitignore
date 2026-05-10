@@ -1,0 +1,18 @@
+ # data files
+results.json
+metadata_store.json
+
+# resume folder
+docs/
+
+# python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# scratch file
+home.py
+
+# env/secrets
+.env
