@@ -10,7 +10,7 @@ def embeddings(chunks):
 
     texts = [chunk.page_content for chunk in chunks]
 
-    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device="cpu")
 
     embeddings = model.encode(texts)
     embeddings = np.array(embeddings).astype("float32")
