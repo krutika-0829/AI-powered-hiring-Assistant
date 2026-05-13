@@ -10,9 +10,10 @@ def embeddings(chunks):
 
     texts = [chunk.page_content for chunk in chunks]
 
-    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device="cpu")
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")  
 
-    embeddings = model.encode(texts)
+    vectors = model.encode(texts, batch_size=16, show_progress_bar=False)
     embeddings = np.array(embeddings).astype("float32")
 
     dimension = embeddings.shape[1]
