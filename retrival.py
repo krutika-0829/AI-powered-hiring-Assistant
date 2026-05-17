@@ -2,6 +2,8 @@ import json
 import numpy as np
 from collections import defaultdict
 from llm import query_filter 
+import os
+
 
 
 def safe_str(value):
@@ -17,16 +19,61 @@ def safe_str(value):
 
 def retrieve_chunks(user_query, index, model, chunks, k):
 
+   
+
     if isinstance(user_query, dict):
-        user_query = user_query.get("answer") or user_query.get("query") or str(user_query)
+        user_query = (
+            user_query.get("answer")
+            or user_query.get("query")
+            or str(user_query)
+        )
+
     if isinstance(user_query, list):
         user_query = " ".join(user_query)
 
-    query_embedding = model.encode([user_query])
-    query_embedding = np.array(query_embedding).astype("float32")
+    USE_OPENAI = (
+        os.getenv("USE_OPENAI", "false").lower() == "true"
+    )
 
-    distances, indices = index.search(query_embedding, k)
-    retrieved_chunks = [chunks[i] for i in indices[0]]
+    
+    if USE_OPENAI:
+
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=os.getenv("OPENAI_API_KEY")
+        )
+
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=[user_query]
+        )
+
+        query_embedding = np.array(
+            [response.data[0].embedding]
+        ).astype("float32")
+
+   
+    else:
+
+        query_embedding = model.encode(
+            [user_query]
+        )
+
+        query_embedding = np.array(
+            query_embedding
+        ).astype("float32")
+
+    
+    distances, indices = index.search(
+        query_embedding,
+        k
+    )
+
+    retrieved_chunks = [
+        chunks[i] for i in indices[0]
+    ]
+
     return retrieved_chunks
 
 
